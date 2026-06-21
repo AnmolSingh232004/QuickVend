@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: quickvend-backend
+    env: docker
+    dockerfilePath: ./backend/Dockerfile
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        # Set this to: jdbc:postgresql://<host>:<port>/<dbname>
+        # Get values from Render PostgreSQL dashboard
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRATION_MS
+        value: 86400000
+      - key: PORT
+        value: 8080
+
+  - type: postgresql
+    name: quickvend-db
+    plan: free
+    ipAllowList: []

@@ -1,0 +1,52 @@
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: quickvend-db
+    environment:
+      POSTGRES_DB: quickvend
+      POSTGRES_USER: quickvend
+      POSTGRES_PASSWORD: quickvend
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quickvend"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: quickvend-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/quickvend
+      SPRING_DATASOURCE_USERNAME: quickvend
+      SPRING_DATASOURCE_PASSWORD: quickvend
+      JWT_SECRET: 4a6f686e446f6553656372657456657279566572795365637265744b6579466f724a57545369676e696e67416e64456e6372797074696f6e
+      UPLOAD_DIR: /app/uploads
+      PORT: 8080
+    ports:
+      - "8081:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - uploads_data:/app/uploads
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: quickvend-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  uploads_data:
